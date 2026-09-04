@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Didáctico de Multímetro & Fuentes ATX</title>
+    <style>
+        :root {
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-300: #cbd5e1;
+            --slate-100: #f1f5f9;
+            --blue-600: #2563eb;
+            --blue-700: #1d4ed8;
+            --red-600: #dc2626;
+            --emerald-600: #059669;
+            --amber-500: #d97706;
+            --yellow-400: #facc15;
+            --tester-yellow: #f59e0b;
+            --tester-border: #b45309;
+            --screen-lcd: #a7f3d0;
+            --red-probe: #dc2626;
+            --black-probe: #1e293b;
+            --accent: #2563eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--slate-800);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--slate-900);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            color: var(--yellow-400);
+        }
+
+        header p {
+            color: var(--slate-300);
+            font-size: 0.95rem;
+        }
+
+        /* --- GUÍA DE USO --- */
+        .guide-container {
+            background-color: white;
+            border: 1px solid var(--slate-300);
+            border-left: 6px solid var(--blue-600);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .guide-container h2 {
+            font-size: 1.2rem;
+            color: var(--slate-900);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media(min-width: 768px) {
+            .guide-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .guide-card {
+            background-color: var(--slate-100);
+            border-radius: 6px;
+            padding: 15px;
+            border: 1px solid var(--slate-300);
+        }
+
+        .guide-card h3 {
+            font-size: 1rem;
+            color: var(--blue-700);
+            margin-bottom: 8px;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            font-size: 0.85rem;
+        }
+
+        .guide-card li {
+            margin-bottom: 6px;
+            position: relative;
+            padding-left: 18px;
+        }
+
+        .guide-card li::before {
+            content: "•";
+            color: var(--blue-600);
+            font-weight: bold;
+            font-size: 1.2rem;
+            position: absolute;
+            left: 0;
+            top: -3px;
+        }
+
+        /* --- BARRA DE NAVEGACIÓN DIRECTA --- */
+        .nav-shortcuts {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn-nav {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            background-color: var(--slate-800);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-nav:hover {
+            background-color: var(--blue-600);
+            transform: translateY(-2px);
+        }
+
+        /* --- SECCIÓN INTEGRADA: MESA DE PRUEBAS INTERACTIVA (SIM 10) --- */
+        .interactive-bench-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--slate-300);
+            scroll-margin-top: 20px;
+        }
+
+        .layout-bench {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            max-width: 100%;
+        }
+
+        @media(min-width: 850px) {
+            .layout-bench { grid-template-columns: 260px 1fr; }
+        }
+
+        .tester-compact {
+            background-color: var(--tester-yellow);
+            border: 4px solid var(--tester-border);
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            height: fit-content;
+        }
+
+        .lcd-screen {
+            background-color: var(--screen-lcd);
+            color: #064e3b;
+            font-family: monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: right;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 2px solid #047857;
+            margin-bottom: 10px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .unit-tag { font-size: 0.8rem; color: #047857; }
+
+        .dial-compact {
+            background-color: var(--slate-800);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .dial-wheel {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #334155;
+            border: 3px dashed #94a3b8;
+            margin: 0 auto 5px;
+            position: relative;
+            transition: transform 0.3s;
+        }
+
+        .dial-needle {
+            width: 4px;
+            height: 22px;
+            background-color: var(--red-probe);
+            position: absolute;
+            top: 3px;
+            left: calc(50% - 2px);
+            border-radius: 2px;
+        }
+
+        .probe-status-panel {
+            background-color: rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        .main-workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bench-area {
+            background-color: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            scroll-margin-top: 20px;
+        }
+
+        .component-stage {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+            background-color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            border: 1px dashed #94a3b8;
+        }
+
+        .component-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .component-visual svg {
+            width: 140px;
+            height: 60px;
+        }
+
+        .pin-btn {
+            background-color: #e2e8f0;
+            border: 2px solid #64748b;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .pin-btn:hover { background-color: #cbd5e1; transform: scale(1.1); }
+        .pin-btn.connected-red { background-color: var(--red-probe); color: white; border-color: #991b1b; }
+        .pin-btn.connected-black { background-color: var(--black-probe); color: white; border-color: black; }
+
+        .probe-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: white;
+            background-color: var(--accent);
+        }
+
+        .btn-action:hover { opacity: 0.9; }
+
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            background-color: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card h4 { font-size: 0.95rem; color: var(--slate-800); margin-bottom: 4px; }
+        .card p { font-size: 0.75rem; color: #64748b; margin-bottom: 10px; }
+
+        .state-options {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .btn-state {
+            flex: 1;
+            padding: 4px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .btn-state.active-ok { background-color: #16a34a; color: white; border-color: #16a34a; }
+        .btn-state.active-bad { background-color: var(--red-probe); color: white; border-color: var(--red-probe); }
+
+        .btn-select {
+            width: 100%;
+            padding: 8px;
+            background-color: var(--slate-800);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-select:hover { background-color: var(--tester-border); }
+
+        .info-box {
+            font-size: 0.8rem;
+            background-color: #f1f5f9;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            border-left: 3px solid var(--accent);
+            width: 100%;
+        }
+
+        /* --- ESTILOS DEL SIMULADOR ATX --- */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            scroll-margin-top: 20px;
+        }
+
+        @media (min-width: 968px) {
+            .container {
+                grid-template-columns: 380px 1fr;
+            }
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--slate-100);
+        }
+
+        .tester-body {
+            background-color: #f97316;
+            border-radius: 20px;
+            padding: 15px;
+            border: 5px solid #ea580c;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+        .tester-screen {
+            background-color: #a7f3d0;
+            color: #064e3b;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: right;
+            font-size: 2rem;
+            border: 4px solid var(--slate-800);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+            margin-bottom: 15px;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tester-unit {
+            font-size: 1.1rem;
+            color: #047857;
+        }
+
+        .tester-controls {
+            background-color: var(--slate-800);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dial-container {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background-color: var(--slate-900);
+            border: 6px dashed var(--slate-300);
+            position: relative;
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .dial-pointer {
+            width: 8px;
+            height: 60px;
+            background-color: var(--red-600);
+            position: absolute;
+            top: 5px;
+            left: calc(50% - 4px);
+            border-radius: 4px;
+            transform-origin: bottom center;
+        }
+
+        .dial-label {
+            position: absolute;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .label-off { top: 5px; left: 50%; transform: translateX(-50%); }
+        .label-volt { right: 10px; top: 50%; transform: translateY(-50%); color: var(--yellow-400); }
+        .label-ohm { bottom: 5px; left: 50%; transform: translateX(-50%); color: #60a5fa; }
+        .label-diodo { left: 10px; top: 50%; transform: translateY(-50%); color: #f472b6; }
+
+        .btn-dial {
+            background-color: var(--slate-700);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            width: 100%;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .btn-dial:hover {
+            background-color: var(--slate-600);
+        }
+
+        .probes-status {
+            background-color: var(--slate-900);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .probe-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .probe-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: inline-block;
+        }
+
+        .dot-red { background-color: var(--red-600); }
+        .dot-black { background-color: black; border: 1px solid white; }
+
+        .board-container {
+            position: relative;
+            background-color: #15803d;
+            border-radius: 12px;
+            padding: 20px;
+            border: 4px solid #166534;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            color: white;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed rgba(255,255,255,0.2);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .board-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--yellow-400);
+        }
+
+        .hotspot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .component-card {
+            background-color: rgba(15, 23, 42, 0.55);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .component-card:hover {
+            border-color: var(--yellow-400);
+            background-color: rgba(15, 23, 42, 0.7);
+            transform: scale(1.02);
+        }
+
+        .component-card.selected-active {
+            border-color: var(--yellow-400);
+            box-shadow: 0 0 10px var(--yellow-400);
+        }
+
+        .component-name {
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: var(--yellow-400);
+        }
+
+        .component-desc {
+            font-size: 0.7rem;
+            color: var(--slate-300);
+        }
+
+        .terminal-btn-group {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 8px;
+        }
+
+        .btn-terminal {
+            font-size: 0.65rem;
+            padding: 4px 6px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-t-red {
+            background-color: var(--red-600);
+            color: white;
+        }
+
+        .btn-t-red:hover { background-color: #b91c1c; }
+
+        .btn-t-black {
+            background-color: black;
+            color: white;
+            border: 1px solid var(--slate-700);
+        }
+
+        .btn-t-black:hover { background-color: #1c1917; }
+
+        .controls-panel {
+            margin-top: 20px;
+        }
+
+        .selector-label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--slate-300);
+            background-color: white;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            color: var(--slate-800);
+        }
+
+        .btn-submit {
+            background-color: var(--blue-600);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--blue-700);
+        }
+
+        .feedback-box {
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .feedback-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1.5px solid #34d399;
+        }
+
+        .feedback-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1.5px solid #f87171;
+        }
+
+        .case-selector-container {
+            background-color: var(--slate-100);
+            border-left: 5px solid var(--blue-600);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+            scroll-margin-top: 20px;
+        }
+
+        .hint-text {
+            font-size: 0.85rem;
+            color: var(--slate-700);
+            margin-top: 8px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🛠️ Simulador Didáctico de Multímetro & Fuentes ATX</h1>
+        <p>Aprende a medir y diagnosticar componentes electrónicos en frío utilizando las puntas del tester en cada bloque de la fuente.</p>
+    </header>
+
+    <!-- GUÍA DE USO INTERACTIVA -->
+    <div class="guide-container">
+        <h2>📖 Guía Rápida de Diagnóstico</h2>
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3>🧪 Parte 1: Mesa de Pruebas Individual</h3>
+                <ul>
+                    <li><b>Selecciona el Estado:</b> Elige si quieres probar el componente en estado "Sano" o con falla.</li>
+                    <li><b>Monta el Componente:</b> Haz clic en <i>"🧪 Montar..."</i> para enviarlo automáticamente al área de medición.</li>
+                    <li><b>Usa las Puntas:</b> Toca el pin A y luego el pin B para conectar la punta Roja y Negra. El tester elegirá la escala adecuada automáticamente.</li>
+                </ul>
+            </div>
+            <div class="guide-card">
+                <h3>🔍 Parte 2: Diagnóstico por Casos (Fuente ATX)</h3>
+                <ul>
+                    <li><b>Lee la Falla:</b> Selecciona un caso clínico del menú desplegable para conocer los síntomas de la fuente.</li>
+                    <li><b>Mide en la Placa:</b> Selecciona el modo en la perilla del Multímetro (Resistencia o Diodo/Continuidad) y conecta las puntas a las piezas de la PCB.</li>
+                    <li><b>Reporta la Avería:</b> Completa el formulario con el componente defectuoso hallado y confirma tu diagnóstico.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTONES DE NAVEGACIÓN DIRECTA -->
+    <nav class="nav-shortcuts">
+        <button class="btn-nav" onclick="scrollToSection('sec-bench')">🧪 Ir a Mesa de Pruebas</button>
+        <button class="btn-nav" onclick="scrollToSection('sec-cases')">🔌 Ir a Selección de Casos</button>
+        <button class="btn-nav" onclick="scrollToSection('sec-atx')">📟 Ir a Diagnóstico PCB ATX</button>
+    </nav>
+
+    <!-- MESA DE PRUEBAS INTERACTIVA E INDIVIDUAL DE COMPONENTES -->
+    <section class="interactive-bench-section" id="sec-bench">
+        <div class="layout-bench">
+            <!-- TESTER COMPACTO -->
+            <div class="tester-compact">
+                <div class="lcd-screen">
+                    <span id="lcd-val">OFF</span>
+                    <span class="unit-tag" id="lcd-unit"></span>
+                </div>
+                
+                <div class="dial-compact">
+                    <div class="dial-wheel" id="dial-wheel">
+                        <div class="dial-needle"></div>
+                    </div>
+                    <div id="dial-label" style="font-size: 0.75rem;">Modo: Apagado</div>
+                </div>
+
+                <div class="probe-status-panel">
+                    <div>🔴 <b>Roja:</b> <span id="probe-red-lbl">Sin conectar</span></div>
+                    <div>⚫ <b>Negra:</b> <span id="probe-black-lbl">Sin conectar</span></div>
+                </div>
+            </div>
+
+            <!-- MESA DE TRABAJO -->
+            <div class="main-workspace">
+                <div class="bench-area" id="bench-workspace">
+                    <h3 id="active-title" style="font-size: 1rem; color: #334155;">Selecciona una pieza abajo para comenzar</h3>
+                    
+                    <div class="component-stage" id="stage" style="display: none;">
+                        <button class="pin-btn" id="pin-1" onclick="clickPin(1)">A</button>
+                        
+                        <div class="component-visual">
+                            <div id="svg-container"></div>
+                            <span id="graphic-name" style="font-size:0.75rem; font-weight:bold; color:#475569; margin-top:4px;"></span>
+                        </div>
+
+                        <button class="pin-btn" id="pin-2" onclick="clickPin(2)">B</button>
+                    </div>
+
+                    <div class="probe-controls" id="controls" style="display: none;">
+                        <button class="btn-action" onclick="swapProbes()">🔄 Invertir Puntas</button>
+                        <button class="btn-action" style="background-color: #64748b;" onclick="resetBenchProbes()">Retirar Puntas</button>
+                    </div>
+
+                    <div class="info-box" id="info-desc" style="display: none;"></div>
+                </div>
+
+                <!-- CATÁLOGO DE PIEZAS -->
+                <div class="components-grid">
+                    <!-- FUSIBLE -->
+                    <div class="card">
+                        <div>
+                            <h4>1. Fusible</h4>
+                            <p>Hilo protector de cristal.</p>
+                            <div class="state-options">
+                                <button class="btn-state active-ok" onclick="setCompState('fusible', 'ok', this)">Sano</button>
+                                <button class="btn-state" onclick="setCompState('fusible', 'bad', this)">Quemado</button>
+                            </div>
+                        </div>
+                        <button class="btn-select" onclick="loadComponent('fusible')">🧪 Montar Fusible</button>
+                    </div>
+
+                    <!-- DIODO -->
+                    <div class="card">
+                        <div>
+                            <h4>2. Diodo Rectificador</h4>
+                            <p>Paso unidireccional (A a K).</p>
+                            <div class="state-options">
+                                <button class="btn-state active-ok" onclick="setCompState('diodo', 'ok', this)">Sano</button>
+                                <button class="btn-state" onclick="setCompState('diodo', 'bad', this)">En Corto</button>
+                            </div>
+                        </div>
+                        <button class="btn-select" onclick="loadComponent('diodo')">🧪 Montar Diodo</button>
+                    </div>
+
+                    <!-- CONDENSADOR -->
+                    <div class="card">
+                        <div>
+                            <h4>3. Condensador</h4>
+                            <p>Capacitor electrolítico.</p>
+                            <div class="state-options">
+                                <button class="btn-state active-ok" onclick="setCompState('condensador', 'ok', this)">Sano</button>
+                                <button class="btn-state" onclick="setCompState('condensador', 'bad', this)">Seco (Alta ESR)</button>
+                            </div>
+                        </div>
+                        <button class="btn-select" onclick="loadComponent('condensador')">🧪 Montar Condensador</button>
+                    </div>
+
+                    <!-- BOBINA -->
+                    <div class="card">
+                        <div>
+                            <h4>4. Bobina</h4>
+                            <p>Inductor de cobre enrollado.</p>
+                            <div class="state-options">
+                                <button class="btn-state active-ok" onclick="setCompState('bobina', 'ok', this)">Sano</button>
+                                <button class="btn-state" onclick="setCompState('bobina', 'bad', this)">Abierta</button>
+                            </div>
+                        </div>
+                        <button class="btn-select" onclick="loadComponent('bobina')">🧪 Montar Bobina</button>
+                    </div>
+
+                    <!-- TRANSFORMADOR -->
+                    <div class="card">
+                        <div>
+                            <h4>5. Transformador</h4>
+                            <p>Núcleo con devanados de cobre.</p>
+                            <div class="state-options">
+                                <button class="btn-state active-ok" onclick="setCompState('transformador', 'ok', this)">Sano</button>
+                                <button class="btn-state" onclick="setCompState('transformador', 'bad', this)">Quemado</button>
+                            </div>
+                        </div>
+                        <button class="btn-select" onclick="loadComponent('transformador')">🧪 Montar Transformador</button>
+                    </div>
+
+                    <!-- RESISTENCIA -->
+                    <div class="card">
+                        <div>
+                            <h4>6. Resistencia</h4>
+                            <p>Código de colores por bandas.</p>
+                            <div class="state-options">
+                                <button class="btn-state active-ok" onclick="setCompState('resistencia', 'ok', this)">100 Ω</button>
+                                <button class="btn-state" onclick="setCompState('resistencia', 'bad', this)">Abierta</button>
+                            </div>
+                        </div>
+                        <button class="btn-select" onclick="loadComponent('resistencia')">🧪 Montar Resistencia</button>
+                    </div>
+
+                    <!-- MOSFET -->
+                    <div class="card" style="grid-column: 1 / -1;">
+                        <div>
+                            <h4>7. MOSFET (Medición Source a Drain)</h4>
+                            <p>Encapsulado TO-220 de potencia.</p>
+                            <div class="state-options">
+                                <button class="btn-state active-ok" onclick="setCompState('mosfet', 'ok', this)">Sano</button>
+                                <button class="btn-state" onclick="setCompState('mosfet', 'bad', this)">En Corto</button>
+                            </div>
+                        </div>
+                        <button class="btn-select" onclick="loadComponent('mosfet')">🧪 Montar MOSFET</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SELECTOR DE EJERCICIO / CASO CLÍNICO -->
+    <div class="case-selector-container" id="sec-cases">
+        <label class="selector-label" for="caseSelect">🔌 Selecciona una Falla de la Fuente para Investigar:</label>
+        <select id="caseSelect" onchange="loadCase()">
+            <option value="1">Caso 1: La fuente no hace nada (No da voltajes de standby ni verde; fusible sano)</option>
+            <option value="2">Caso 2: Al enchufarla saltan los plomos / térmica en casa</option>
+            <option value="3">Caso 3: La fuente enciende 1 segundo y se apaga (O no arranca el PC con carga)</option>
+            <option value="4">Caso 4: No hay standby de 5V, pero el fusible de entrada de CA está intacto</option>
+        </select>
+        <div id="caseBrief" style="font-weight: bold; margin-top: 5px; color: var(--slate-800);"></div>
+        <div id="caseSymptom" class="hint-text"></div>
+    </div>
+
+    <!-- DIAGNÓSTICO EN PCB DE LA FUENTE ATX -->
+    <div class="container" id="sec-atx">
+        <!-- Columna Izquierda: El Multímetro -->
+        <div class="panel">
+            <h2 style="margin-bottom: 12px; font-size: 1.1rem;">📟 Multímetro Digital (Tester)</h2>
+            <div class="tester-body">
+                <div class="tester-screen">
+                    <span id="screenVal">OFF</span>
+                    <span id="screenUnit" class="tester-unit"></span>
+                </div>
+                
+                <div class="tester-controls">
+                    <div class="dial-container" id="dialObj">
+                        <div class="dial-pointer" id="dialPointer"></div>
+                        <span class="dial-label label-off">OFF</span>
+                        <span class="dial-label label-volt">V=</span>
+                        <span class="dial-label label-ohm">Ω</span>
+                        <span class="dial-label label-diodo">▶|•))</span>
+                    </div>
+                    
+                    <button class="btn-dial" onclick="rotateDial()">Girar Selector de Escala</button>
+                </div>
+
+                <div class="probes-status">
+                    <div class="probe-line">
+                        <span class="probe-dot dot-red"></span>
+                        <span><b>Punta Roja (+):</b> <span id="redLoc">Libre</span></span>
+                    </div>
+                    <div class="probe-line">
+                        <span class="probe-dot dot-black"></span>
+                        <span><b>Punta Negra (-):</b> <span id="blackLoc">Libre</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn-dial" style="margin-top:15px; background-color: var(--slate-800);" onclick="resetProbes()">Retirar Puntas del Circuito</button>
+        </div>
+
+        <!-- Columna Derecha: El Circuito de la Fuente -->
+        <div class="panel">
+            <h2 style="margin-bottom: 12px; font-size: 1.1rem;">📋 Banco de Pruebas: PCB de la Fuente ATX</h2>
+            
+            <div class="board-container">
+                <div class="board-header">
+                    <span class="board-title">🔧 Bloques Físicos de Medición</span>
+                    <span style="font-size: 0.75rem; background-color: rgba(255,255,255,0.15); padding: 3px 8px; border-radius: 4px;">Placa SMPS</span>
+                </div>
+
+                <div class="hotspot-grid">
+                    <!-- FUSIBLE -->
+                    <div class="component-card" id="card_F1" onclick="selectCard('F1')">
+                        <div class="component-name">Fusible (F1)</div>
+                        <div class="component-desc">Entrada de CA y protección contra sobrecorriente.</div>
+                        <div class="terminal-btn-group">
+                            <button class="btn-terminal btn-t-red" onclick="connectProbe('red', 'F1', event)">Punta Roja</button>
+                            <button class="btn-terminal btn-t-black" onclick="connectProbe('black', 'F1', event)">Punta Negra</button>
+                        </div>
+                    </div>
+
+                    <!-- RESISTENCIA -->
+                    <div class="component-card" id="card_R1" onclick="selectCard('R1')">
+                        <div class="component-name">Resistor (R1)</div>
+                        <div class="component-desc">Resistencia de arranque de 2 MΩ en el oscilador.</div>
+                        <div class="terminal-btn-group">
+                            <button class="btn-terminal btn-t-red" onclick="connectProbe('red', 'R1', event)">Punta Roja</button>
+                            <button class="btn-terminal btn-t-black" onclick="connectProbe('black', 'R1', event)">Punta Negra</button>
+                        </div>
+                    </div>
+
+                    <!-- MOSFET -->
+                    <div class="component-card" id="card_Q1" onclick="selectCard('Q1')">
+                        <div class="component-name">MOSFET (Q1)</div>
+                        <div class="component-desc">Transistor MOSFET de potencia para conmutación.</div>
+                        <div class="terminal-btn-group">
+                            <button class="btn-terminal btn-t-red" onclick="connectProbe('red', 'Q1', event)">Punta Roja</button>
+                            <button class="btn-terminal btn-t-black" onclick="connectProbe('black', 'Q1', event)">Punta Negra</button>
+                        </div>
+                    </div>
+
+                    <!-- DIODO -->
+                    <div class="component-card" id="card_D1" onclick="selectCard('D1')">
+                        <div class="component-name">Diodo (D1)</div>
+                        <div class="component-desc">Rectificador Schottky rápido de la línea Standby.</div>
+                        <div class="terminal-btn-group">
+                            <button class="btn-terminal btn-t-red" onclick="connectProbe('red', 'D1', event)">Punta Roja</button>
+                            <button class="btn-terminal btn-t-black" onclick="connectProbe('black', 'D1', event)">Punta Negra</button>
+                        </div>
+                    </div>
+
+                    <!-- CAPACITORES -->
+                    <div class="component-card" id="card_C1" onclick="selectCard('C1')">
+                        <div class="component-name">Capacitor (C1)</div>
+                        <div class="component-desc">Filtro de salida del secundario de potencia.</div>
+                        <div class="terminal-btn-group">
+                            <button class="btn-terminal btn-t-red" onclick="connectProbe('red', 'C1', event)">Punta Roja</button>
+                            <button class="btn-terminal btn-t-black" onclick="connectProbe('black', 'C1', event)">Punta Negra</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.75rem; color: #cbd5e1; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    💡 Haz clic en los botones de "Punta" en cada componente para simular la conexión de las terminales del tester.
+                </div>
+            </div>
+
+            <!-- Panel de Envío de Respuestas -->
+            <div class="controls-panel">
+                <h2 style="margin-bottom: 12px; font-size: 1.1rem;">🎯 Formulario de Diagnóstico (Tu Respuesta de Técnico)</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label class="selector-label" for="faultyComponent">Componente Defectuoso:</label>
+                        <select id="faultyComponent">
+                            <option value="">-- Selecciona el componente --</option>
+                            <option value="F1">Fusible (F1)</option>
+                            <option value="R1">Resistencia de Arranque (R1)</option>
+                            <option value="Q1">Transistor MOSFET (Q1)</option>
+                            <option value="D1">Diodo Schottky (D1)</option>
+                            <option value="C1">Capacitores de Filtro (C1)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="selector-label" for="faultType">Estado / Falla Diagnosticada:</label>
+                        <select id="faultType">
+                            <option value="">-- Selecciona el estado --</option>
+                            <option value="BUENO">Funciona Correctamente</option>
+                            <option value="ABIERTO">Circuito Abierto / Quemado</option>
+                            <option value="CORTO">Cortocircuito Franco</option>
+                            <option value="ESR_ALTA">ESR Alterada / Seco</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-submit" onclick="submitDiagnostic()">Enviar Diagnóstico Técnico</button>
+                <div id="feedback" class="feedback-box"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LÓGICA Y SCRIPTS DE LA APLICACIÓN -->
+    <script>
+        /* --- FUNCIÓN DE NAVEGACIÓN --- */
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        /* --- LÓGICA DE LA MESA DE PRUEBAS INTERACTIVA (SIM 10) --- */
+        const benchStates = {
+            fusible: 'ok', diodo: 'ok', condensador: 'ok',
+            bobina: 'ok', transformador: 'ok', resistencia: 'ok', mosfet: 'ok'
+        };
+
+        const svgs = {
+            fusible: `<svg viewBox="0 0 140 60"><rect x="20" y="20" width="100" height="20" rx="4" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/><rect x="20" y="20" width="20" height="20" fill="#94a3b8"/><rect x="100" y="20" width="20" height="20" fill="#94a3b8"/><line x1="40" y1="30" x2="100" y2="30" stroke="#f59e0b" stroke-width="2"/></svg>`,
+            diodo: `<svg viewBox="0 0 140 60"><rect x="30" y="18" width="80" height="24" rx="3" fill="#1e293b"/><rect x="95" y="18" width="8" height="24" fill="#cbd5e1"/><line x1="10" y1="30" x2="30" y2="30" stroke="#64748b" stroke-width="4"/><line x1="110" y1="30" x2="130" y2="30" stroke="#64748b" stroke-width="4"/></svg>`,
+            condensador: `<svg viewBox="0 0 140 60"><rect x="45" y="10" width="50" height="40" rx="4" fill="#1e3a8a"/><rect x="45" y="10" width="12" height="40" fill="#94a3b8"/><line x1="15" y1="30" x2="45" y2="30" stroke="#64748b" stroke-width="4"/><line x1="95" y1="30" x2="125" y2="30" stroke="#64748b" stroke-width="4"/></svg>`,
+            bobina: `<svg viewBox="0 0 140 60"><rect x="30" y="20" width="80" height="20" rx="10" fill="#b45309"/><line x1="40" y1="15" x2="40" y2="45" stroke="#d97706" stroke-width="3"/><line x1="60" y1="15" x2="60" y2="45" stroke="#d97706" stroke-width="3"/><line x1="80" y1="15" x2="80" y2="45" stroke="#d97706" stroke-width="3"/><line x1="100" y1="15" x2="100" y2="45" stroke="#d97706" stroke-width="3"/><line x1="10" y1="30" x2="30" y2="30" stroke="#64748b" stroke-width="4"/><line x1="110" y1="30" x2="130" y2="30" stroke="#64748b" stroke-width="4"/></svg>`,
+            transformador: `<svg viewBox="0 0 140 60"><rect x="40" y="10" width="60" height="40" fill="#475569" rx="2"/><rect x="50" y="15" width="40" height="30" fill="#b45309"/><line x1="10" y1="20" x2="40" y2="20" stroke="#64748b" stroke-width="3"/><line x1="10" y1="40" x2="40" y2="40" stroke="#64748b" stroke-width="3"/><line x1="100" y1="20" x2="130" y2="20" stroke="#64748b" stroke-width="3"/><line x1="100" y1="40" x2="130" y2="40" stroke="#64748b" stroke-width="3"/></svg>`,
+            resistencia: `<svg viewBox="0 0 140 60"><path d="M 30,30 L 45,20 L 55,40 L 65,20 L 75,40 L 85,20 L 95,40 L 105,20 L 110,30" fill="none" stroke="#d97706" stroke-width="4"/><line x1="10" y1="30" x2="30" y2="30" stroke="#64748b" stroke-width="4"/><line x1="110" y1="30" x2="130" y2="30" stroke="#64748b" stroke-width="4"/></svg>`,
+            mosfet: `<svg viewBox="0 0 140 60"><rect x="50" y="5" width="40" height="30" fill="#1e293b" rx="2"/><rect x="55" y="8" width="30" height="8" fill="#94a3b8"/><line x1="55" y1="35" x2="55" y2="55" stroke="#64748b" stroke-width="3"/><line x1="70" y1="35" x2="70" y2="55" stroke="#64748b" stroke-width="3"/><line x1="85" y1="35" x2="85" y2="55" stroke="#64748b" stroke-width="3"/><line x1="15" y1="45" x2="55" y2="45" stroke="#64748b" stroke-width="2"/><line x1="85" y1="45" x2="125" y2="45" stroke="#64748b" stroke-width="2"/></svg>`
+        };
+
+        let activeComponent = null;
+        let benchRedPin = null;
+        let benchBlackPin = null;
+        let audioCtx = null;
+
+        function playBeep() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(2700, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function setCompState(comp, val, btn) {
+            benchStates[comp] = val;
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.btn-state').forEach(b => b.classList.remove('active-ok', 'active-bad'));
+            btn.classList.add(val === 'ok' ? 'active-ok' : 'active-bad');
+            if (activeComponent === comp) updateBenchMeasurement();
+        }
+
+        function loadComponent(comp) {
+            activeComponent = comp;
+            resetBenchProbes();
+            
+            document.getElementById('stage').style.display = 'flex';
+            document.getElementById('controls').style.display = 'flex';
+            document.getElementById('info-desc').style.display = 'block';
+
+            const names = {
+                fusible: 'FUSIBLE', diodo: 'DIODO (Ánodo ➔ Cátodo)', condensador: 'CAPACITOR ELECTROLÍTICO',
+                bobina: 'BOBINA / INDUCTOR', transformador: 'TRANSFORMADOR', resistencia: 'RESISTENCIA', mosfet: 'MOSFET (Source ➔ Drain)'
+            };
+
+            document.getElementById('svg-container').innerHTML = svgs[comp];
+            document.getElementById('graphic-name').innerText = names[comp];
+            document.getElementById('active-title').innerText = `Mesa de Pruebas: ${names[comp]}`;
+            
+            updateBenchMeasurement();
+
+            // Auto-desplazamiento suave hacia la mesa de trabajo
+            document.getElementById('bench-workspace').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function clickPin(pinNum) {
+            if (!activeComponent) return;
+
+            if (benchRedPin === null) {
+                benchRedPin = pinNum;
+            } else if (benchBlackPin === null && pinNum !== benchRedPin) {
+                benchBlackPin = pinNum;
+            } else {
+                benchRedPin = pinNum;
+                benchBlackPin = null;
+            }
+            updateBenchMeasurement();
+        }
+
+        function swapProbes() {
+            if (benchRedPin !== null || benchBlackPin !== null) {
+                const temp = benchRedPin;
+                benchRedPin = benchBlackPin;
+                benchBlackPin = temp;
+                updateBenchMeasurement();
+            }
+        }
+
+        function resetBenchProbes() {
+            benchRedPin = null;
+            benchBlackPin = null;
+            updateBenchMeasurement();
+        }
+
+        function setDialBench(angle, label) {
+            document.getElementById('dial-wheel').style.transform = `rotate(${angle}deg)`;
+            document.getElementById('dial-label').innerText = `Modo: ${label}`;
+        }
+
+        function updateBenchMeasurement() {
+            const p1 = document.getElementById('pin-1');
+            const p2 = document.getElementById('pin-2');
+            const lcdVal = document.getElementById('lcd-val');
+            const lcdUnit = document.getElementById('lcd-unit');
+            const info = document.getElementById('info-desc');
+
+            if (!p1 || !p2) return;
+
+            p1.className = 'pin-btn';
+            p2.className = 'pin-btn';
+
+            document.getElementById('probe-red-lbl').innerText = benchRedPin ? `Pin ${benchRedPin === 1 ? 'A' : 'B'}` : 'Sin conectar';
+            document.getElementById('probe-black-lbl').innerText = benchBlackPin ? `Pin ${benchBlackPin === 1 ? 'A' : 'B'}` : 'Sin conectar';
+
+            if (benchRedPin === 1) p1.classList.add('connected-red');
+            if (benchRedPin === 2) p2.classList.add('connected-red');
+            if (benchBlackPin === 1) p1.classList.add('connected-black');
+            if (benchBlackPin === 2) p2.classList.add('connected-black');
+
+            if (!activeComponent || benchRedPin === null || benchBlackPin === null) {
+                lcdVal.innerText = 'O.L';
+                lcdUnit.innerText = '';
+                info.innerText = 'Conecta ambas puntas (Roja y Negra) en los pines A o B para medir.';
+                return;
+            }
+
+            const state = benchStates[activeComponent];
+
+            if (activeComponent === 'fusible') {
+                setDialBench(135, 'Continuidad');
+                if (state === 'ok') {
+                    lcdVal.innerText = '0.001'; lcdUnit.innerText = '🔔';
+                    info.innerHTML = '✅ <b>OK:</b> El fusible tiene continuidad. Muestra resistencia casi nula y pita.';
+                    playBeep();
+                } else {
+                    lcdVal.innerText = 'O.L'; lcdUnit.innerText = '';
+                    info.innerHTML = '❌ <b>ROTO:</b> Abierto. Marca O.L porque el hilo interno se quemó.';
+                }
+            } 
+            else if (activeComponent === 'diodo') {
+                setDialBench(135, 'Prueba de Diodo');
+                if (state === 'ok') {
+                    if (benchRedPin === 1 && benchBlackPin === 2) {
+                        lcdVal.innerText = '0.515'; lcdUnit.innerText = 'V';
+                        info.innerHTML = '✅ <b>POLARIZACIÓN DIRECTA:</b> Caída de voltaje correcta (0.4V a 0.7V).';
+                    } else {
+                        lcdVal.innerText = 'O.L'; lcdUnit.innerText = '';
+                        info.innerHTML = '✅ <b>POLARIZACIÓN INVERSA:</b> Bloquea el paso de corriente correctamente (O.L).';
+                    }
+                } else {
+                    lcdVal.innerText = '0.000'; lcdUnit.innerText = '🔔';
+                    info.innerHTML = '❌ <b>ROTO:</b> Cortocircuito. Marca 0 en ambas direcciones y pita.';
+                    playBeep();
+                }
+            }
+            else if (activeComponent === 'condensador') {
+                setDialBench(180, 'Ohmios / ESR');
+                if (state === 'ok') {
+                    lcdVal.innerText = '0.8'; lcdUnit.innerText = 'Ω';
+                    info.innerHTML = '✅ <b>OK:</b> Resistencia ESR baja y saludable.';
+                } else {
+                    lcdVal.innerText = '45.0'; lcdUnit.innerText = 'Ω';
+                    info.innerHTML = '❌ <b>ROTO:</b> Alta ESR. El capacitor está desgastado o seco.';
+                }
+            }
+            else if (activeComponent === 'bobina') {
+                setDialBench(135, 'Continuidad');
+                if (state === 'ok') {
+                    lcdVal.innerText = '0.002'; lcdUnit.innerText = '🔔';
+                    info.innerHTML = '✅ <b>OK:</b> Continuidad correcta en el devanado.';
+                    playBeep();
+                } else {
+                    lcdVal.innerText = 'O.L'; lcdUnit.innerText = '';
+                    info.innerHTML = '❌ <b>ROTO:</b> Alambre cortado.';
+                }
+            }
+            else if (activeComponent === 'transformador') {
+                setDialBench(135, 'Continuidad');
+                if (state === 'ok') {
+                    lcdVal.innerText = '0.004'; lcdUnit.innerText = '🔔';
+                    info.innerHTML = '✅ <b>OK:</b> Devanado primario continuo.';
+                    playBeep();
+                } else {
+                    lcdVal.innerText = 'O.L'; lcdUnit.innerText = '';
+                    info.innerHTML = '❌ <b>ROTO:</b> Bobinado abierto/quemado.';
+                }
+            }
+            else if (activeComponent === 'resistencia') {
+                setDialBench(180, 'Ohmios');
+                if (state === 'ok') {
+                    lcdVal.innerText = '100.1'; lcdUnit.innerText = 'Ω';
+                    info.innerHTML = '✅ <b>OK:</b> Muestra el valor de resistencia nominal.';
+                } else {
+                    lcdVal.innerText = 'O.L'; lcdUnit.innerText = '';
+                    info.innerHTML = '❌ <b>ROTO:</b> Abierta o alterada.';
+                }
+            }
+            else if (activeComponent === 'mosfet') {
+                setDialBench(135, 'Prueba de Diodo');
+                if (state === 'ok') {
+                    if (benchRedPin === 1 && benchBlackPin === 2) {
+                        lcdVal.innerText = '0.520'; lcdUnit.innerText = 'V';
+                        info.innerHTML = '✅ <b>OK (S➔D):</b> Muestra la lectura del diodo cuerpo interno.';
+                    } else {
+                        lcdVal.innerText = 'O.L'; lcdUnit.innerText = '';
+                        info.innerHTML = '✅ <b>OK (D➔S):</b> Bloqueo inverso correcto.';
+                    }
+                } else {
+                    lcdVal.innerText = '0.001'; lcdUnit.innerText = '🔔';
+                    info.innerHTML = '❌ <b>ROTO:</b> Cortocircuito total entre Source y Drain.';
+                    playBeep();
+                }
+            }
+        }
+
+
+        /* --- LÓGICA DEL SIMULADOR DE DIAGNÓSTICO ATX --- */
+        let currentMode = 0;
+        let redProbe = null;   
+        let blackProbe = null; 
+
+        const cases = {
+            1: {
+                brief: "Caso 1: Resistencia Abierta",
+                symptom: "Síntoma: La fuente no enciende ni responde. Standby = 0V, Verde = 0V. Fusible intacto. El problema es típico de la etapa primaria de alimentación del oscilador.",
+                F1: "OK", R1: "ABIERTO", Q1: "OK", D1: "OK", C1: "OK",
+                solution: { comp: "R1", type: "ABIERTO", explanation: "¡Excelente! La resistencia de arranque R1 está abierta (marca O.L). Al estar en la etapa primaria, impide el arranque del integrado oscilador, por lo que no genera voltaje de standby ni verde, a pesar de que el fusible esté en perfecto estado." }
+            },
+            2: {
+                brief: "Caso 2: MOSFET en Cortocircuito",
+                symptom: "Síntoma: Al conectar la fuente a 220V saltan los fusibles de protección de la red eléctrica de la casa. Fusible F1 de la fuente calcinado.",
+                F1: "ABIERTO", R1: "OK", Q1: "CORTO", D1: "OK", C1: "OK",
+                solution: { comp: "Q1", type: "CORTO", explanation: "¡Excelente diagnóstico! El MOSFET de potencia de conmutación Q1 está en cortocircuito entre sus patillas Drain y Source (marca continuidad / 0.001 V). Esto causó una corriente masiva que fundió el fusible de protección F1 y disparó la térmica de casa." }
+            },
+            3: {
+                brief: "Caso 3: Capacitores de Salida Agotados",
+                symptom: "Síntoma: Al puentear verde y negro, el ventilador gira por un segundo y se detiene. En vacío da voltajes aceptables, pero no soporta ninguna carga de computadora.",
+                F1: "OK", R1: "OK", Q1: "OK", D1: "OK", C1: "ESR_ALTA",
+                solution: { comp: "C1", type: "ESR_ALTA", explanation: "¡Correcto! Los capacitores electrolíticos C1 del secundario tienen una ESR muy elevada (15.0 Ω en lugar de 1.5 Ω) y baja capacitancia. Esto impide el filtrado correcto del rizado de alta frecuencia, por lo que las protecciones secundarias de sobrevoltaje apagan la fuente al instante." }
+            },
+            4: {
+                brief: "Caso 4: Diodo Schottky de Standby en Corto",
+                symptom: "Síntoma: Fusible de CA intacto. Al conectar la fuente hay 0V en el cable morado de standby y en el verde. La línea de standby se encuentra totalmente muerta.",
+                F1: "OK", R1: "OK", Q1: "OK", D1: "CORTO", C1: "OK",
+                solution: { comp: "D1", type: "CORTO", explanation: "¡Fabuloso! El diodo rectificador rápido Schottky D1 de la línea secundaria de standby se puso en cortocircuito (mide continuidad 0.002 en ambos sentidos). Al estar en corto, tumba completamente la pequeña etapa de standby de 5V impidiendo el arranque básico." }
+            }
+        };
+
+        let activeCaseId = 1;
+
+        window.onload = function() {
+            loadCase();
+        };
+
+        function loadCase() {
+            activeCaseId = parseInt(document.getElementById("caseSelect").value);
+            const currentCase = cases[activeCaseId];
+            
+            document.getElementById("caseBrief").innerText = currentCase.brief;
+            document.getElementById("caseSymptom").innerText = currentCase.symptom;
+            
+            document.getElementById("feedback").style.display = "none";
+            resetProbes();
+        }
+
+        function rotateDial() {
+            currentMode = (currentMode + 1) % 4;
+            const dialPointer = document.getElementById("dialPointer");
+            
+            const rotations = [0, 90, 180, 270];
+            dialPointer.style.transform = `rotate(${rotations[currentMode]}deg)`;
+            
+            updateScreen();
+        }
+
+        function connectProbe(color, componentId, event) {
+            if (event) event.stopPropagation();
+            
+            if (color === 'red') {
+                redProbe = componentId;
+                document.getElementById("redLoc").innerText = getComponentName(componentId);
+            } else {
+                blackProbe = componentId;
+                document.getElementById("blackLoc").innerText = getComponentName(componentId);
+            }
+            
+            document.querySelectorAll(".component-card").forEach(card => card.classList.remove("selected-active"));
+            if (redProbe) document.getElementById(`card_${redProbe}`).classList.add("selected-active");
+            if (blackProbe) document.getElementById(`card_${blackProbe}`).classList.add("selected-active");
+
+            updateScreen();
+        }
+
+        function resetProbes() {
+            redProbe = null;
+            blackProbe = null;
+            document.getElementById("redLoc").innerText = "Libre";
+            document.getElementById("blackLoc").innerText = "Libre";
+            document.querySelectorAll(".component-card").forEach(card => card.classList.remove("selected-active"));
+            updateScreen();
+        }
+
+        function getComponentName(id) {
+            const names = {
+                F1: "Fusible (F1)",
+                R1: "Resistor (R1)",
+                Q1: "MOSFET (Q1)",
+                D1: "Diodo (D1)",
+                C1: "Capacitor (C1)"
+            };
+            return names[id] || "Libre";
+        }
+
+        function updateScreen() {
+            const screenVal = document.getElementById("screenVal");
+            const screenUnit = document.getElementById("screenUnit");
+
+            if (currentMode === 0) {
+                screenVal.innerText = "OFF";
+                screenUnit.innerText = "";
+                return;
+            }
+
+            if (!redProbe || !blackProbe || redProbe !== blackProbe) {
+                if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V CC"; }
+                else if (currentMode === 2) { screenVal.innerText = "O.L"; screenUnit.innerText = "MΩ"; }
+                else if (currentMode === 3) { screenVal.innerText = "O.L"; screenUnit.innerText = ""; }
+                return;
+            }
+
+            const activeCase = cases[activeCaseId];
+            const compState = activeCase[redProbe];
+
+            if (redProbe === "F1") {
+                if (compState === "OK") {
+                    if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V"; }
+                    else if (currentMode === 2) { screenVal.innerText = "0.1"; screenUnit.innerText = "Ω"; }
+                    else if (currentMode === 3) { screenVal.innerText = "0.001 *BEEP*"; screenUnit.innerText = "V"; playBeep(); }
+                } else if (compState === "ABIERTO") {
+                    if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V"; }
+                    else if (currentMode === 2) { screenVal.innerText = "O.L"; screenUnit.innerText = "MΩ"; }
+                    else if (currentMode === 3) { screenVal.innerText = "O.L"; screenUnit.innerText = ""; }
+                }
+            }
+            
+            else if (redProbe === "R1") {
+                if (compState === "OK") {
+                    if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V"; }
+                    else if (currentMode === 2) { screenVal.innerText = "2.00"; screenUnit.innerText = "MΩ"; }
+                    else if (currentMode === 3) { screenVal.innerText = "O.L"; screenUnit.innerText = ""; }
+                } else if (compState === "ABIERTO") {
+                    if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V"; }
+                    else if (currentMode === 2) { screenVal.innerText = "O.L"; screenUnit.innerText = "MΩ"; }
+                    else if (currentMode === 3) { screenVal.innerText = "O.L"; screenUnit.innerText = ""; }
+                }
+            }
+
+            else if (redProbe === "Q1") {
+                if (compState === "OK") {
+                    if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V"; }
+                    else if (currentMode === 2) { screenVal.innerText = "OL"; screenUnit.innerText = "MΩ"; }
+                    else if (currentMode === 3) { screenVal.innerText = "0.520"; screenUnit.innerText = "V (S-D)"; }
+                } else if (compState === "CORTO") {
+                    if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V"; }
+                    else if (currentMode === 2) { screenVal.innerText = "0.1"; screenUnit.innerText = "Ω"; }
+                    else if (currentMode === 3) { screenVal.innerText = "0.001 *BEEP*"; screenUnit.innerText = "V"; playBeep(); }
+                }
+            }
+
+            else if (redProbe === "D1") {
+                if (compState === "OK") {
+                    if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V"; }
+                    else if (currentMode === 2) { screenVal.innerText = "1.2"; screenUnit.innerText = "MΩ"; }
+                    else if (currentMode === 3) { screenVal.innerText = "0.150"; screenUnit.innerText = "V (A-C)"; }
+                } else if (compState === "CORTO") {
+                    if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V"; }
+                    else if (currentMode === 2) { screenVal.innerText = "0.2"; screenUnit.innerText = "Ω"; }
+                    else if (currentMode === 3) { screenVal.innerText = "0.002 *BEEP*"; screenUnit.innerText = "V"; playBeep(); }
+                }
+            }
+
+            else if (redProbe === "C1") {
+                if (compState === "OK") {
+                    if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V"; }
+                    else if (currentMode === 2) { screenVal.innerText = "1.5"; screenUnit.innerText = "Ω (ESR)"; }
+                    else if (currentMode === 3) { screenVal.innerText = "O.L"; screenUnit.innerText = ""; }
+                } else if (compState === "ESR_ALTA") {
+                    if (currentMode === 1) { screenVal.innerText = "0.00"; screenUnit.innerText = "V"; }
+                    else if (currentMode === 2) { screenVal.innerText = "15.0"; screenUnit.innerText = "Ω (ESR)"; }
+                    else if (currentMode === 3) { screenVal.innerText = "O.L"; screenUnit.innerText = ""; }
+                }
+            }
+        }
+
+        function selectCard(comp) {
+            if (!redProbe) { connectProbe('red', comp); }
+            else if (!blackProbe && redProbe !== comp) { connectProbe('black', comp); }
+        }
+
+        function submitDiagnostic() {
+            const userComp = document.getElementById("faultyComponent").value;
+            const userType = document.getElementById("faultType").value;
+            const feedback = document.getElementById("feedback");
+
+            if (!userComp || !userType) {
+                feedback.className = "feedback-box feedback-error";
+                feedback.innerText = "⚠️ Por favor, selecciona un componente y su estado antes de enviar.";
+                feedback.style.display = "block";
+                return;
+            }
+
+            const currentCase = cases[activeCaseId];
+            const solution = currentCase.solution;
+
+            if (userComp === solution.comp && userType === solution.type) {
+                feedback.className = "feedback-box feedback-success";
+                feedback.innerHTML = `🎉 <b>¡Diagnóstico Correcto!</b><br/><br/>${solution.explanation}`;
+                feedback.style.display = "block";
+            } else {
+                feedback.className = "feedback-box feedback-error";
+                feedback.innerHTML = `❌ <b>Diagnóstico incorrecto.</b><br/>Sigue tomando mediciones en frío con el multímetro en el circuito y verifica las lecturas de los componentes. Revisa las escalas de resistencia (Ω) y diodo/continuidad.`;
+                feedback.style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>
