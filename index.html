@@ -804,7 +804,7 @@
                     <div class="card">
                         <div>
                             <h4>1. Fusible</h4>
-                            <p>Hilo protector de cristal.</p>
+                            <p>Cuerpo de cristal con filamento dentro.</p>
                             <div class="state-options">
                                 <button class="btn-state active-ok" onclick="setCompState('fusible', 'ok', this)">Sano</button>
                                 <button class="btn-state" onclick="setCompState('fusible', 'bad', this)">Quemado</button>
@@ -900,7 +900,7 @@
         <label class="selector-label" for="caseSelect">🔌 Selecciona una Falla de la Fuente para Investigar:</label>
         <select id="caseSelect" onchange="loadCase()">
             <option value="1">Caso 1: La fuente no hace nada (No da voltajes de standby ni verde; fusible sano)</option>
-            <option value="2">Caso 2: Al enchufarla saltan los plomos / térmica en casa</option>
+            <option value="2">Caso 2: Al enchufarla saltan la térmica en casa</option>
             <option value="3">Caso 3: La fuente enciende 1 segundo y se apaga (O no arranca el PC con carga)</option>
             <option value="4">Caso 4: No hay standby de 5V, pero el fusible de entrada de CA está intacto</option>
         </select>
@@ -953,7 +953,6 @@
             <div class="board-container">
                 <div class="board-header">
                     <span class="board-title">🔧 Bloques Físicos de Medición</span>
-                    <span style="font-size: 0.75rem; background-color: rgba(255,255,255,0.15); padding: 3px 8px; border-radius: 4px;">Placa SMPS</span>
                 </div>
 
                 <div class="hotspot-grid">
@@ -1035,7 +1034,7 @@
                             <option value="">-- Selecciona el estado --</option>
                             <option value="BUENO">Funciona Correctamente</option>
                             <option value="ABIERTO">Circuito Abierto / Quemado</option>
-                            <option value="CORTO">Cortocircuito Franco</option>
+                            <option value="CORTO">Cortocircuito </option>
                             <option value="ESR_ALTA">ESR Alterada / Seco</option>
                         </select>
                     </div>
